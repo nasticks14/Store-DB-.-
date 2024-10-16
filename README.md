@@ -1,74 +1,86 @@
 # Store-DB-.-
+CREATE DATABASE online_store;
+USE online_store;
+
 CREATE TABLE stores (
-    store_code VARCHAR(50) PRIMARY KEY,
+    store_code VARCHAR(10) PRIMARY KEY,
     store_name VARCHAR(100),
-    store_url VARCHAR(100),
+    store_url VARCHAR(255),
     store_country VARCHAR(50),
-    phone VARCHAR(15),
+    phone VARCHAR(20),
     email VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE transactions (
+    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
+    store_code VARCHAR(10),
+    transaction_type VARCHAR(50),
+    amount DECIMAL(10, 2),
+    total DECIMAL(10, 2),
+    tax DECIMAL(10, 2),
+    error_code VARCHAR(20),
+    ip_address VARCHAR(45),
+    postal_code VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (store_code) REFERENCES stores(store_code)
+);
+
 CREATE TABLE customers (
-    customer_id SERIAL PRIMARY KEY,
+    customer_id INT AUTO_INCREMENT PRIMARY KEY,
     customer_name VARCHAR(100),
+    credit_card_num VARCHAR(20),
+    credit_card_date VARCHAR(7),  -- Формат: MM/YYYY
+    credit_card_cvv VARCHAR(4),
     billing_country VARCHAR(50),
     billing_city VARCHAR(50),
     state_province VARCHAR(50),
-    postal_code VARCHAR(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE orders (
-    order_id SERIAL PRIMARY KEY,
-    store_code VARCHAR(50),
-    customer_id INT,
-    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    payment_status VARCHAR(20),
-    total DECIMAL(10, 2),
-    shipping_cost DECIMAL(10, 2),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (store_code) REFERENCES stores(store_code),
-    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
-);
-
-CREATE TABLE transactions (
-    transaction_id SERIAL PRIMARY KEY,
-    order_id INT,
-    transaction_type VARCHAR(20),
-    amount DECIMAL(10, 2),
-    tax DECIMAL(10, 2),
-    error_code VARCHAR(20),
-    ip_address VARCHAR(15),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES orders(order_id)
-);
-
 CREATE TABLE products (
-    product_id SERIAL PRIMARY KEY,
-    store_code VARCHAR(50),
+    product_id INT AUTO_INCREMENT PRIMARY KEY,
     product_name VARCHAR(100),
     visible BOOLEAN,
     weight DECIMAL(10, 2),
     height DECIMAL(10, 2),
     sold INT,
-    currency VARCHAR(10),
+    currency VARCHAR(5),
     price DECIMAL(10, 2),
     image_url VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (store_code) REFERENCES stores(store_code)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE order_items (
-    order_item_id SERIAL PRIMARY KEY,
-    order_id INT,
-    product_id INT,
+CREATE TABLE orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    transaction_id INT,
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    shipping_cost DECIMAL(10, 2),
     quantity INT,
+    status VARCHAR(50),
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES orders(order_id),
-    FOREIGN KEY (product_id) REFERENCES products(product_id)
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
+    FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id)
 );
+
+CREATE TABLE products (
+    store_id INTEGER NOT NULL,
+    product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    visible TINYINT NOT NULL DEFAULT 1,
+    height INTEGER NULL,
+    weight INTEGER NULL,
+    currency VARCHAR(3) NULL,
+    price DECIMAL(9, 3) NULL,
+    product_name VARCHAR(50) NOT NULL,
+    sold INTEGER NULL,
+    image_url VARCHAR(255) NULL,
+    notes VARCHAR(255) NULL,
+    quality INTEGER NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
     INSERT INTO products (store_id, visible, height, weight, currency, price, product_name, sold, image_url, notes, quality, created_at)
     -> VALUES
     -> (1, 1, 20, 500, 'UAH', 19.50, 'Bread', 250, 'https://www.jabko/image/bread.jpg', 'The promotion is valid until 15.10.2024', 300, '2024-10-13 12:17:51'),
